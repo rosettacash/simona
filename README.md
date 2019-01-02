@@ -1,21 +1,5 @@
 # Simona
 
-**TODO: Add description**
+**IN PROGRESS**
 
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `simona` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:simona, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/simona](https://hexdocs.pm/simona).
-
+Simona is an observer of blockchain, not miner node, not full node. Simona will connect to all the nodes in a blockchain network, to reach the fastest broadcasting speed, and monitoring the orphan blocks and double-spend transactions.

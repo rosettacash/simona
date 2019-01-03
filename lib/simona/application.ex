@@ -10,6 +10,7 @@ defmodule Simona.Application do
     children = [
       # Starts a worker by calling: Simona.Worker.start_link(arg)
       # {Simona.Worker, arg},
+      Simona.Discoverer
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -1,6 +1,25 @@
 defmodule Simona.Discoverer do
-  # use GenServer
+  use GenServer
 
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, nil)
+  end
+
+  @impl true
+  def init(_) do
+    init_peers_table()
+
+    default_peers()
+    |> Enum.map(fn d ->
+      query_res(d)
+      |> Enum.each(&insert_peer/1)
+    end)
+    {:ok, nil}
+  end
+  def get_rand_peer do
+    [{ip, nil}|_] = list_peers()
+    ip
+  end
 
   def init_peers_table do
     :ets.new(:peers_table, [:named_table, :set])
@@ -25,13 +44,7 @@ defmodule Simona.Discoverer do
   end
 
   def test do
-    init_peers_table()
-
-    default_peers()
-    |> Enum.map(fn d ->
-      query_res(d)
-      |> Enum.each(&insert_peer/1)
-    end)
+    init(nil)
 
     list_peers()
   end

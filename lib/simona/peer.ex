@@ -3,19 +3,21 @@ defmodule Simona.Peer do
   based https://github.com/rosettacash/bitcoin-elixir/blob/develop/lib/bitcoin/node/network/peer.ex
   """
   alias Simona.Discoverer
-  alias Simona.Message
-  alias Simona.NetworkAddress
+
+  alias Bitcoin.Protocol.Messages
+  alias Bitcoin.Protocol.Types.NetworkAddress
+  # alias Simona.NetworkAddress
   alias Simona.Util
   use GenServer
 
-  @default_listen_port 8333
+  @default_port 8333
   @default_services <<1, 0, 0, 0, 0, 0, 0, 0>>
-  @protocol_version 70002
+  @protocol_version 70015
   @user_agent "/simona:0.0.0/"
 
   @default_config %{
     listen_ip: {0,0,0,0},
-    listen_port: @default_listen_port,
+    listen_port: @default_port,
     max_connections: 8,
     user_agent: @user_agent,
     data_directory: Path.expand("~/.simona/bsv"),
@@ -31,8 +33,6 @@ defmodule Simona.Peer do
     version: @protocol_version,
     user_agent: @user_agent
   }
-
-  @protocol_version 70002
 
 
 
@@ -56,18 +56,23 @@ defmodule Simona.Peer do
     case :gen_tcp.connect(ip, port, [:binary, active: true]) do
       {:ok, socket} ->
         send(self(), :handshake)
-        {:ok, state |> Map.put(:socket, socket)}
+        {:noreply, state |> Map.put(:socket, socket)}
       {:error, :etimeout} ->
-        state |> disconnect(:connection_timeout)
+        IO.puts "timeout"
+        {:noreply, state}
+        # state |> disconnect(:connection_timeout)
       {:error, _} ->
-        state |> disconnect(:connection_error)
+        IO.puts "error"
+        {:noreply, state}
+        # state |> disconnect(:connection_error)
     end
   end
 
+  @impl true
   def handle_info(:handshake, state) do
     node_config = @default_config
 
-    pkt = %Message.Version{
+    pkt = %Messages.Version{
       address_of_receiving_node: %NetworkAddress{
         address: state.ip,
         port: state.port,
@@ -78,13 +83,15 @@ defmodule Simona.Peer do
         services: node_config.services,
         },
     }
-    |> Map.merge(@version_fields)
-    |> Message.serialize()
+      |> Map.merge(@version_fields)
+      |> IO.inspect()
+      |> Bitcoin.Protocol.Message.serialize()
 
     :ok = state.socket |> :gen_tcp.send(pkt)
     {:noreply, state}
   end
 
+  @impl true
   def handle_info(msg, state) do
     IO.inspect(msg, label: "msg: ")
     {:noreply, state}
